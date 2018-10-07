@@ -315,7 +315,7 @@ for (int i = 0; i < 32; i++) {
 
 \subsubsection{Set operations}
 
-Set operations can be implemented as follows as bit operations:
+Set operations can easily be implemented as bit operations:
 
 \begin{center}
 \begin{tabular}{lll}
@@ -376,7 +376,7 @@ time complexity of the algorithm,
 but they may have a large impact
 on the actual running time of the code.
 In this section we discuss examples
-of such situations.
+of this situation.
 
 \subsubsection{Hamming distances}
 
@@ -503,9 +503,10 @@ for (int i = 0; i < n; i++) {
     if (color[a][i] == 1 && color[b][i] == 1) count++;
 }
 \end{lstlisting}
-Then, those columns
-account for $\texttt{count}(\texttt{count}-1)/2$ subgrids with black corners,
-because we can choose any two of them to form a subgrid.
+Then, those columns account for
+\[\binom{\texttt{count}}{2} = \dfrac{\texttt{count} \cdot (\texttt{count} - 1)}{2}\]
+subgrids with black corners, because we can
+choose any two of them to form a subgrid.
 
 To optimize this algorithm, we divide the grid into blocks
 of columns such that each block consists of $N$
