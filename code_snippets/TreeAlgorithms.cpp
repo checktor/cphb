@@ -3,11 +3,14 @@
 
 // Adjacency list representation of tree.
 static std::vector< std::vector<int> > tree;
+
 // Store parent of each node as given by last dfs run.
 static std::vector<int> parents;
+
 // Store length of longest and second longest path
 // to a leaf for every single node in the tree.
 static std::vector< std::pair<int, int> > lengthLongestPathToLeaf;
+
 // For every node in the tree, store child node through which
 // the longest / the second longest path to a leaf leads.
 static std::vector< std::pair<int, int> > nodeLongestPathToLeaf;
@@ -46,15 +49,14 @@ void dfs(int parent, int current) {
                         continue;
                 }
                 dfs(current, child);
-                // Update length of longest path to leaf node
-                // after each recursive call (if necessary).
+                // Update metadata after each recursive call.
                 process(current, child);
         }
 }
 
 int getLengthDiameter() {
         // Compute diameter by adding up longest and
-        // second longest path to leaf concerning
+        // second longest path to a leaf concerning
         // every node and choosing the maximum.
         int maxDiameter = 0;
         for (int i = 0; i < lengthLongestPathToLeaf.size(); i++) {
@@ -103,7 +105,7 @@ void getLengthAllLongestPaths(std::vector<int>* allLongestPaths) {
 }
 
 int main() {
-        // Define tree and corresponding meta data.
+        // Define tree and corresponding metadata.
         int numNodes = 6;
         for (int i = 0; i < numNodes; i++) {
                 // Tree.
@@ -111,7 +113,7 @@ int main() {
                 tree.push_back(defaultVector);
                 // Parents.
                 parents.push_back(-1);
-                // Meta data.
+                // Metadata.
                 std::pair<int, int> firstDefaultPair(0, 0);
                 lengthLongestPathToLeaf.push_back(firstDefaultPair);
                 std::pair<int, int> secondDefaultPair(-1, -1);
