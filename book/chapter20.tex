@@ -1019,8 +1019,9 @@ However, if the graph is bipartite,
 \key{Kőnig's theorem} tells us that
 the size of a minimum node cover
 and the size of a maximum matching are always equal.
-Thus, we can calculate the size of a minimum node cover
-using a maximum flow algorithm.
+Thus, we can calculate the size of a minimum
+node cover by computing a maximum matching
+(and therefore by using a maximum flow algorithm).
 
 Let us consider the following graph
 with a maximum matching of size 3:
@@ -1047,9 +1048,83 @@ with a maximum matching of size 3:
 \path[draw=red,thick,-,line width=2pt] (3) -- (6);
 \end{tikzpicture}
 \end{center}
-Now Kőnig's theorem tells us that the size
-of a minimum node cover is also 3.
-Such a cover can be constructed as follows:
+
+Kőnig's theorem tells us that
+the size of a minimum node cover is
+also 3. But how can we find out which
+nodes would have been used to build
+the corresponding vertex cover?
+
+Consider that all nodes on the left side of the
+graph are stored in a set $L$. Correspondingly, all
+nodes on the right can be found in $R$. In this case,
+$L = \{ 1, 2, 3, 4 \}$ and $R = \{ 5, 6, 7, 8 \}$.
+All unmatched vertices in $L$ are added to another
+set $Z$, i.e. $Z = \{ 4 \}$. In the following
+graph, the nodes in $Z$ are highlighted.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.60]
+\node[draw, circle] (1) at (2,4.5) {1};
+\node[draw, circle] (2) at (2,3) {2};
+\node[draw, circle] (3) at (2,1.5) {3};
+\node[draw, circle, fill=lightgray] (4) at (2,0) {4};
+\node[draw, circle] (5) at (8,4.5) {5};
+\node[draw, circle] (6) at (8,3) {6};
+\node[draw, circle] (7) at (8,1.5) {7};
+\node[draw, circle] (8) at (8,0) {8};
+
+\path[draw,thick,-] (1) -- (5);
+\path[draw,thick,-] (2) -- (7);
+\path[draw,thick,-] (3) -- (5);
+\path[draw,thick,-] (3) -- (6);
+\path[draw,thick,-] (3) -- (8);
+\path[draw,thick,-] (4) -- (7);
+
+\path[draw=red,thick,-,line width=2pt] (1) -- (5);
+\path[draw=red,thick,-,line width=2pt] (2) -- (7);
+\path[draw=red,thick,-,line width=2pt] (3) -- (6);
+\end{tikzpicture}
+\end{center}
+
+Use this initial nodes as starting points for the following step.
+In this step, further nodes are added to $Z$ only if they are
+reachable from an initial node via an alternating path, i.e. a path
+containing unmatched and matched vertices in alternating order.
+In this case, $4$ is the only initial node. Vertices $7$ and $2$
+can be reached from node $4$ by using edges in alternating
+order. In this example, there is no other alternating path
+starting at an unmatched vertex in $L$. Therefore, $Z$ finally
+contains the nodes $2$, $4$ and $7$, as shown in the following graph.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.60]
+\node[draw, circle] (1) at (2,4.5) {1};
+\node[draw, circle, fill=lightgray] (2) at (2,3) {2};
+\node[draw, circle] (3) at (2,1.5) {3};
+\node[draw, circle, fill=lightgray] (4) at (2,0) {4};
+\node[draw, circle] (5) at (8,4.5) {5};
+\node[draw, circle] (6) at (8,3) {6};
+\node[draw, circle, fill=lightgray] (7) at (8,1.5) {7};
+\node[draw, circle] (8) at (8,0) {8};
+
+\path[draw,thick,-] (1) -- (5);
+\path[draw,thick,-] (2) -- (7);
+\path[draw,thick,-] (3) -- (5);
+\path[draw,thick,-] (3) -- (6);
+\path[draw,thick,-] (3) -- (8);
+\path[draw,thick,-] (4) -- (7);
+
+\path[draw=red,thick,-,line width=2pt] (1) -- (5);
+\path[draw=red,thick,-,line width=2pt] (2) -- (7);
+\path[draw=red,thick,-,line width=2pt] (3) -- (6);
+\end{tikzpicture}
+\end{center}
+
+Now a minimum node cover $K$ can be constructed as follows:
+\[ K = (L \setminus Z) \cup (R \cap Z) \].
+
+The next graph highlights all nodes of the minimum node cover $K$.
 
 \begin{center}
 \begin{tikzpicture}[scale=0.60]
@@ -1068,8 +1143,44 @@ Such a cover can be constructed as follows:
 \path[draw,thick,-] (3) -- (6);
 \path[draw,thick,-] (3) -- (8);
 \path[draw,thick,-] (4) -- (7);
+
+\path[draw=red,thick,-,line width=2pt] (1) -- (5);
+\path[draw=red,thick,-,line width=2pt] (2) -- (7);
+\path[draw=red,thick,-,line width=2pt] (3) -- (6);
 \end{tikzpicture}
 \end{center}
+
+To understand the formula for $K$, note that every edge
+$e$ lying on an alternating path has both neighboring nodes
+stored in $Z$. Intuitively, its right vertex is part of the
+matching. It is also chosen for the node cover $K$ by the
+right part of the formula, i.e. $(R \cap Z)$. Otherwise,
+$e$ does not belong to an alternating path. In this
+situation, $e$ is either matched or unmatched.
+
+If $e$ is unmatched, at least one node incident to $e$
+is matched because otherwise the size of the matching
+could be increased by adding $e$. In every case, $e$'s
+left node is matched and does not belong to any alternating
+path because otherwise $e$ could be added to this path.
+In other words, the edge's left node is never part of $Z$
+and therefore chosen for the node cover by the left part
+of the formula, i.e. $(L \setminus Z)$.
+
+In the other case, $e$ is matched. By definition,
+both neighboring nodes are matched and cannot
+be incident to another edge of the matching. If $e$'s
+neighboring node on the left would be part of an alternating
+path, $e$ itself could be added to this path. But we
+know that $e$ is not part of an alternating path so
+neither is its left node. Again, this left node is not
+part of $Z$ and therefore chosen for the vertex cover.
+
+For every edge, exactly one neighboring node is part
+of $K$. Additionally, every node in $K$ is matched.
+Therefore, the size of a maximum matching equals the size
+of the corresponding node cover. So $K$ must be a
+minimum node cover.
 
 \index{independent set}
 \index{maximum independent set}

@@ -40,16 +40,16 @@ We can calculate the probability using the formula
 
 In this problem, the desired outcomes are those
 in which the value of each card is the same.
-There are $13 {4 \choose 3}$ such outcomes,
+There are $13 \binom{4}{3}$ such outcomes,
 because there are $13$ possibilities for the
-value of the cards and ${4 \choose 3}$ ways to
+value of the cards and $\binom{4}{3}$ ways to
 choose $3$ suits from $4$ possible suits.
 
-There are a total of ${52 \choose 3}$ outcomes,
+There are a total of $\binom{52}{3}$ outcomes,
 because we choose 3 cards from 52 cards.
 Thus, the probability of the event is
 
-\[\frac{13 {4 \choose 3}}{{52 \choose 3}} = \frac{1}{425}.\]
+\[\frac{13 \binom{4}{3}}{\binom{52}{3}} = \frac{1}{425}.\]
 
 \subsubsection*{Method 2}
 
@@ -323,15 +323,15 @@ is $p$.
 The random variable $X$ counts the number of
 successful attempts,
 and the probability of a value $x$ is
-\[P(X=x)=p^x (1-p)^{n-x} {n \choose x},\]
+\[ P(X=x)=p^x (1-p)^{n-x} \binom{n}{x}, \]
 where $p^x$ and $(1-p)^{n-x}$ correspond to
 successful and unsuccessful attemps,
-and ${n \choose x}$ is the number of ways
+and $\binom{n}{x}$ is the number of ways
 we can choose the order of the attempts.
 
 For example, when throwing a dice ten times,
 the probability of throwing a six exactly
-three times is $(1/6)^3 (5/6)^7 {10 \choose 3}$.
+three times is $(1/6)^3 (5/6)^7 \binom{10}{3}$.
 
 The expected value of $X$ in a binomial distribution is
 \[E[X] = pn.\]
@@ -686,4 +686,3 @@ Hence, the expected number of edges whose endpoints
 have different colors is $m/2$.
 Since it is expected that a random coloring is valid,
 we will quickly find a valid coloring in practice.
-

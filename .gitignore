@@ -1,0 +1,12 @@
+# Latex files.
+*.aux
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.log
+*.out
+*.synctex.gz
+*.tex~
+*.toc
