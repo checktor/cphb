@@ -427,7 +427,9 @@ a walk of $m$ steps in $O(n^2 m)$ time.
 
 The transitions of a Markov chain can also be
 represented as a matrix that updates the
-probability distribution.
+probability distribution. In this matrix, the
+$j$th entry of row $i$ contains the probability
+of a transition from state $j$ to state $i$.
 In the above scenario, the matrix is
 
 \[ 
@@ -506,7 +508,7 @@ can be solved using randomness.
 
 \index{order statistic}
 
-The $kth$ \key{order statistic} of an array
+The $k$th \key{order statistic} of an array
 is the element at position $k$ after sorting
 the array in increasing order.
 It is easy to calculate any order statistic
