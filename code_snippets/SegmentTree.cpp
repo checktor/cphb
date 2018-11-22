@@ -15,7 +15,7 @@ int getLeftChildIndex(int index) {
 
 int process(int a, int b) {
         // Specify how entries should be processed.
-        return std::max(a, b);
+        return std::min(a, b);
 }
 
 void createTree(std::vector<int> data, std::vector<int>* tree) {
@@ -40,7 +40,10 @@ int processTree(std::vector<int>* tree, int leftIndex, int rightIndex) {
         leftIndex += dataSize;
         rightIndex += dataSize;
         // Initialize result variable.
-        int result = 0;
+        int result;
+        // Create boolean flag indicating if the
+        // result variable is used for the first time.
+        bool isFirstResult = true;
         // Move through segment tree from bottom to top.
         while (leftIndex <= rightIndex) {
                 // Odd indices indicate a right child in the tree.
@@ -51,7 +54,12 @@ int processTree(std::vector<int>* tree, int leftIndex, int rightIndex) {
                         // Otherwise, the left border is a right child,
                         // therefore add it to the result and move to
                         // its right neighbour in the tree.
-                        result = process(result, (*tree)[leftIndex]);
+                        if (isFirstResult) {
+                                result = (*tree)[leftIndex];
+                                isFirstResult = false;
+                        } else {
+                                result = process(result, (*tree)[leftIndex]);
+                        }
                         leftIndex++;
                 }
                 // Even indices indicate a left child in the
@@ -60,7 +68,12 @@ int processTree(std::vector<int>* tree, int leftIndex, int rightIndex) {
                 if ((rightIndex % 2) == 0) {
                         // Otherwise, add the right border to the
                         // result and move to its left neighbour.
-                        result = process(result, (*tree)[rightIndex]);
+                        if (isFirstResult) {
+                                result = (*tree)[rightIndex];
+                                isFirstResult = false;
+                        } else {
+                                result = process(result, (*tree)[rightIndex]);
+                        }
                         rightIndex--;
                 }
                 // Continue with parent nodes.
@@ -96,10 +109,11 @@ int main() {
         // Process segment tree.
         std::cout << processTree(tree, 2, 7) << std::endl;
         // Change a single entry in tree.
-        changeTree(tree, 5, -2);
+        changeTree(tree, 4, -1);
         // Process segment tree again.
         std::cout << processTree(tree, 2, 7) << std::endl;
         // Delete tree.
         delete tree;
+
         return 0;
 }

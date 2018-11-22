@@ -53,22 +53,22 @@ int getSuccessor(int startNode, int numSteps) {
 }
 
 int getFirstNodeCycle(int startNode) {
-        // Create two pointers starting at the same node. The first
-        // is moving one step at a time and the other two steps.
-        // The first node where both pointers meet again must be a
-        // node in the cycle, therefore compute this node.
+        // Create two pointers referencing the same node. The first
+        // will move thorugh the graph one step at a time and the other
+        // two steps. The first node where both pointers meet again
+        // must be a node in a cycle, therefore compute this node.
         int firstPointer = getSuccessor(startNode, 1);
         int secondPointer = getSuccessor(startNode, 2);
         while (firstPointer != secondPointer) {
                 firstPointer = getSuccessor(firstPointer, 1);
                 secondPointer = getSuccessor(secondPointer, 2);
         }
-        // Current node is part of the cycle but not necessarily
-        // the first node seen from starting point. So reset first
-        // pointer to the starting node before moving through the
-        // graph again but this time with the same speed of one
-        // node per step for both pointers. The first time the
-        // pointers meet again indicates the first node of the cycle.
+        // Current node is part of a cycle but not necessarily
+        // its first node reached from starting point. So reset
+        // first pointer to starting node and continue to move
+        // both pointers through the graph, but this time at the
+        // same speed of one node per step. The first time the
+        // pointers meet again indicates the first node on the cycle.
         firstPointer = startNode;
         while (firstPointer != secondPointer) {
                 firstPointer = getSuccessor(firstPointer, 1);
@@ -95,6 +95,7 @@ int main() {
         // Define successor graph.
         int numNodes = 6;
         successorGraph.resize(numNodes);
+
         // Add edges.
         successorGraph[0] = 1;
         successorGraph[1] = 2;
@@ -108,7 +109,6 @@ int main() {
                 std::vector<int> defaultVector;
                 successorPaths.push_back(defaultVector);
         }
-
         // Precompute values of successor paths.
         computeSuccessorPaths(numNodes);
 
