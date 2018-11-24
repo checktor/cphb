@@ -54,7 +54,7 @@ int getSuccessor(int startNode, int numSteps) {
 
 int getFirstNodeCycle(int startNode) {
         // Create two pointers referencing the same node. The first
-        // will move thorugh the graph one step at a time and the other
+        // will move through the graph one step at a time and the other
         // two steps. The first node where both pointers meet again
         // must be a node in a cycle, therefore compute this node.
         int firstPointer = getSuccessor(startNode, 1);

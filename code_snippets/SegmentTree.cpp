@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
-
 
 int getParentIndex(int index) {
         // Get index of parent.
@@ -13,9 +13,16 @@ int getLeftChildIndex(int index) {
         return 2 * index;
 }
 
+int getRightChildIndex(int index) {
+        // Get index of right child.
+        return getLeftChildIndex(index) + 1;
+}
+
 int process(int a, int b) {
-        // Specify how entries should be processed.
-        return std::min(a, b);
+        // Specify how two neighboring entries should be processed.
+        return a + b;
+        // return std::min(a, b);
+        // return std::max(a, b);
 }
 
 void createTree(std::vector<int> data, std::vector<int>* tree) {
@@ -23,25 +30,30 @@ void createTree(std::vector<int> data, std::vector<int>* tree) {
         int dataSize = data.size();
         int treeSize = 2 * dataSize;
         tree->resize(treeSize);
-        // Fill right part of segment tree with input array.
+        // Copy values of input array to leafs,
+        // i.e. to right half of tree array.
         for (int i = 0; i < dataSize; i++) {
                 (*tree)[dataSize + i] = data[i];
         }
-        // Fill left part of segment tree.
+        // Compute values of inner nodes,
+        // i.e. of tree array's left half.
         for (int i = dataSize - 1; i > 0; i--) {
                 int leftChildIndex = getLeftChildIndex(i);
-                (*tree)[i] = process((*tree)[leftChildIndex], (*tree)[leftChildIndex + 1]);
+                int rightChildIndex = getRightChildIndex(i);
+                (*tree)[i] = process((*tree)[leftChildIndex], (*tree)[rightChildIndex]);
         }
 }
 
-int processTree(std::vector<int>* tree, int leftIndex, int rightIndex) {
+int processTreeBottomUp(std::vector<int>* tree,
+                        int leftIndex,
+                        int rightIndex) {
         // Convert data indices to tree indices.
         int dataSize = tree->size() / 2;
         leftIndex += dataSize;
         rightIndex += dataSize;
         // Initialize result variable.
         int result;
-        // Create boolean flag indicating if the
+        // Create a boolean flag indicating if the
         // result variable is used for the first time.
         bool isFirstResult = true;
         // Move through segment tree from bottom to top.
@@ -76,11 +88,66 @@ int processTree(std::vector<int>* tree, int leftIndex, int rightIndex) {
                         }
                         rightIndex--;
                 }
-                // Continue with parent nodes.
+                // Continue processing with parent nodes.
                 leftIndex = getParentIndex(leftIndex);
                 rightIndex = getParentIndex(rightIndex);
         }
         return result;
+}
+
+int processTreeTopDown(std::vector<int>* tree,
+                       int leftIndex,
+                       int rightIndex,
+                       int currentNode,
+                       int nodeRangeLeftIndex,
+                       int nodeRangeRightIndex) {
+        // Desired array range is completely outside the
+        // range covered by current node. In this case,
+        // the corresponding precomputed value is irrelevant.
+        if ((rightIndex < nodeRangeLeftIndex) || (leftIndex > nodeRangeRightIndex)) {
+                throw std::invalid_argument("Desired range is invalid.");
+        }
+        // Range covered by current node completely
+        // contains desired array range, therefore its
+        // precomputed value needs to be taken into account.
+        if ((leftIndex <= nodeRangeLeftIndex) && (nodeRangeRightIndex <= rightIndex)) {
+                return (*tree)[currentNode];
+        }
+        // Continue processing with child nodes.
+        int leftChildIndex = getLeftChildIndex(currentNode);
+        int rightChildIndex = getRightChildIndex(currentNode);
+        // Compute right border of range covered by left child node.
+        int border = (nodeRangeLeftIndex + nodeRangeRightIndex) / 2;
+        // Recursive call for left child node.
+        int leftResult;
+        bool leftSuccessful = true;
+        try {
+                leftResult = processTreeTopDown(tree, leftIndex, rightIndex, leftChildIndex, nodeRangeLeftIndex, border);
+        } catch(const std::invalid_argument& e) {
+                leftSuccessful = false;
+        }
+        // Recursive call for right child node.
+        int rightResult;
+        bool rightSuccessful = true;
+        try {
+                rightResult = processTreeTopDown(tree, leftIndex, rightIndex, rightChildIndex, (border + 1), nodeRangeRightIndex);
+        } catch(const std::invalid_argument& e) {
+                rightSuccessful = false;
+        }
+        // Return result depending on successfully processed child nodes.
+        if (leftSuccessful && rightSuccessful) {
+                // Both child nodes could be processed successfully.
+                return process(leftResult, rightResult);
+        } else if (!leftSuccessful && rightSuccessful) {
+                // Only right child could be processed successfully.
+                return rightResult;
+        } else if (leftSuccessful && !rightSuccessful) {
+                // Only left child could be processed successfully.
+                return leftResult;
+        } else {
+                // No child node could be processed successfully.
+                throw std::invalid_argument("Desired range invalid.");
+        }
 }
 
 void changeTree(std::vector<int>* tree, int index, int difference) {
@@ -92,7 +159,7 @@ void changeTree(std::vector<int>* tree, int index, int difference) {
         // Propagate change through tree from bottom to top.
         index = getParentIndex(index);
         while(index >= 1) {
-                (*tree)[index] = process((*tree)[getLeftChildIndex(index)], (*tree)[getLeftChildIndex(index) + 1]);
+                (*tree)[index] = process((*tree)[getLeftChildIndex(index)], (*tree)[getRightChildIndex(index)]);
                 index = getParentIndex(index);
         }
 }
@@ -107,11 +174,13 @@ int main() {
         std::vector<int>* tree = new std::vector<int>();
         createTree(data, tree);
         // Process segment tree.
-        std::cout << processTree(tree, 2, 7) << std::endl;
+        std::cout << processTreeBottomUp(tree, 2, 7) << std::endl;
+        std::cout << processTreeTopDown(tree, 2, 7, 1, 0, dataSize - 1) << std::endl;
         // Change a single entry in tree.
         changeTree(tree, 4, -1);
         // Process segment tree again.
-        std::cout << processTree(tree, 2, 7) << std::endl;
+        std::cout << processTreeBottomUp(tree, 2, 7) << std::endl;
+        std::cout << processTreeTopDown(tree, 2, 7, 1, 0, dataSize - 1) << std::endl;
         // Delete tree.
         delete tree;
 
