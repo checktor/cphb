@@ -25,26 +25,7 @@ int process(int a, int b) {
         // return std::max(a, b);
 }
 
-void createTree(std::vector<int> data, std::vector<int>* tree) {
-        // Create segment tree as an array.
-        int dataSize = data.size();
-        int treeSize = 2 * dataSize;
-        tree->resize(treeSize);
-        // Copy values of input array to leafs,
-        // i.e. to right half of tree array.
-        for (int i = 0; i < dataSize; i++) {
-                (*tree)[dataSize + i] = data[i];
-        }
-        // Compute values of inner nodes,
-        // i.e. of tree array's left half.
-        for (int i = dataSize - 1; i > 0; i--) {
-                int leftChildIndex = getLeftChildIndex(i);
-                int rightChildIndex = getRightChildIndex(i);
-                (*tree)[i] = process((*tree)[leftChildIndex], (*tree)[rightChildIndex]);
-        }
-}
-
-int processTreeBottomUp(std::vector<int>* tree,
+int getRangeBottomUp(std::vector<int>* tree,
                         int leftIndex,
                         int rightIndex) {
         // Convert data indices to tree indices.
@@ -95,7 +76,7 @@ int processTreeBottomUp(std::vector<int>* tree,
         return result;
 }
 
-int processTreeTopDown(std::vector<int>* tree,
+int getRangeTopDown(std::vector<int>* tree,
                        int leftIndex,
                        int rightIndex,
                        int currentNode,
@@ -122,7 +103,7 @@ int processTreeTopDown(std::vector<int>* tree,
         int leftResult;
         bool leftSuccessful = true;
         try {
-                leftResult = processTreeTopDown(tree, leftIndex, rightIndex, leftChildIndex, nodeRangeLeftIndex, border);
+                leftResult = getRangeTopDown(tree, leftIndex, rightIndex, leftChildIndex, nodeRangeLeftIndex, border);
         } catch(const std::invalid_argument& e) {
                 leftSuccessful = false;
         }
@@ -130,7 +111,7 @@ int processTreeTopDown(std::vector<int>* tree,
         int rightResult;
         bool rightSuccessful = true;
         try {
-                rightResult = processTreeTopDown(tree, leftIndex, rightIndex, rightChildIndex, (border + 1), nodeRangeRightIndex);
+                rightResult = getRangeTopDown(tree, leftIndex, rightIndex, rightChildIndex, (border + 1), nodeRangeRightIndex);
         } catch(const std::invalid_argument& e) {
                 rightSuccessful = false;
         }
@@ -150,13 +131,15 @@ int processTreeTopDown(std::vector<int>* tree,
         }
 }
 
-void changeTree(std::vector<int>* tree, int index, int difference) {
+void updateTree(std::vector<int>* tree, int index, int difference) {
         // Convert data index to tree index.
         int dataSize = tree->size() / 2;
         index += dataSize;
-        // Increase specified leaf node by given difference.
+        // Increase or decrease specific leaf
+        // node by given difference amount.
         (*tree)[index] += difference;
-        // Propagate change through tree from bottom to top.
+        // Propagate change through
+        // tree from bottom to top.
         index = getParentIndex(index);
         while(index >= 1) {
                 (*tree)[index] = process((*tree)[getLeftChildIndex(index)], (*tree)[getRightChildIndex(index)]);
@@ -164,23 +147,45 @@ void changeTree(std::vector<int>* tree, int index, int difference) {
         }
 }
 
-int main() {
-        // Input data.
-        std::vector<int> data {5, 8, 6, 3, 2, 7, 2, 6};
+std::vector<int>* createTree(std::vector<int> data) {
         // Resize input data to the next power of 2.
         int dataSize = std::pow(2, std::ceil(std::log(data.size())/std::log(2)));
         data.resize(dataSize);
-        // Create segment tree.
-        std::vector<int>* tree = new std::vector<int>();
-        createTree(data, tree);
-        // Process segment tree.
-        std::cout << processTreeBottomUp(tree, 2, 7) << std::endl;
-        std::cout << processTreeTopDown(tree, 2, 7, 1, 0, dataSize - 1) << std::endl;
-        // Change a single entry in tree.
-        changeTree(tree, 4, -1);
-        // Process segment tree again.
-        std::cout << processTreeBottomUp(tree, 2, 7) << std::endl;
-        std::cout << processTreeTopDown(tree, 2, 7, 1, 0, dataSize - 1) << std::endl;
+        // Create array of twice the input size initialized with zeros.
+        int treeSize = 2 * dataSize;
+        std::vector<int>* tree = new std::vector<int>(treeSize, 0);
+        // Copy values of input array to leafs,
+        // i.e. to the right half of the tree array.
+        for (int i = 0; i < dataSize; i++) {
+                (*tree)[dataSize + i] = data[i];
+        }
+        // Compute values of inner nodes, i.e.
+        // the left half of the tree array. Note
+        // that the entry at index 0 stays unused,
+        // so the array starts with index 1. This
+        // procedure simplifies index computation.
+        for (int i = dataSize - 1; i > 0; i--) {
+                int leftChildIndex = getLeftChildIndex(i);
+                int rightChildIndex = getRightChildIndex(i);
+                (*tree)[i] = process((*tree)[leftChildIndex], (*tree)[rightChildIndex]);
+        }
+        // Return tree.
+        return tree;
+}
+
+int main() {
+        // Input data array.
+        std::vector<int> data {5, 8, 6, 3, 2, 7, 2, 6};
+        // Create segment tree represented as an array.
+        std::vector<int>* tree = createTree(data);
+        // Process tree.
+        std::cout << getRangeBottomUp(tree, 2, 7) << std::endl;
+        std::cout << getRangeTopDown(tree, 2, 7, 1, 0, (tree->size() / 2) - 1) << std::endl;
+        // Change a single entry.
+        updateTree(tree, 4, -1);
+        // Process tree again.
+        std::cout << getRangeBottomUp(tree, 2, 7) << std::endl;
+        std::cout << getRangeTopDown(tree, 2, 7, 1, 0, (tree->size() / 2) - 1) << std::endl;
         // Delete tree.
         delete tree;
 
